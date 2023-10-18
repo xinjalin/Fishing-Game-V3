@@ -1,5 +1,6 @@
 import tkinter as tk
 from src.utility import *
+from src.fishing_game import *
 
 
 class LoginWindow(tk.Toplevel):
@@ -59,7 +60,7 @@ class RegistrationWindow(tk.Toplevel):
         self.username_label = tk.Label(self, text="Username")
         self.password_label = tk.Label(self, text="Password")
         self.entry_username = tk.Entry(self)
-        self.entry_password = tk.Entry(self, show="*")  # Show asterisks for password input
+        self.entry_password = tk.Entry(self)
         self.login_button = tk.Button(self, text="Register", command=self.register)
         self.home_button = tk.Button(self, text="Home", command=self.home)
 
@@ -102,6 +103,22 @@ class GameWindow(tk.Toplevel):
         super().__init__(master)
         self.title("Game")
         # Add widgets and logic for the game
+        # GUI
+        # button (gofish, keepfish, releasefish)
+        # label (current fish)
+
+        # logic
+        # track record of catches
+        # store the record of each cast of the fishing rod calculate the points for the player
+        # delete record from record of catches if released
+
+        fish = read_fish_csv()
+
+        result_of_fishing = go_fishing(fish)
+        print(result_of_fishing)
+
+        # for fish_obj in fish:  # debug
+        #     print(f'fish: {fish_obj}')
 
 
 class MainApplication(tk.Tk):
