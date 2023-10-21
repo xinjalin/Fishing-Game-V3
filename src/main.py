@@ -22,8 +22,8 @@ class LoginWindow(tk.Toplevel):
         self.password_label.grid(row=1, column=0, padx=10, pady=5, sticky="e")
         self.entry_username.grid(row=0, column=1, padx=10, pady=5, sticky="w")
         self.entry_password.grid(row=1, column=1, padx=10, pady=5, sticky="w")
-        self.login_button.grid(row=2, column=0, columnspan=2, pady=10)
-        self.home_button.grid(row=3, column=0, columnspan=2, pady=5)
+        self.login_button.grid(row=2, column=1, columnspan=1, pady=10, padx=10, sticky="w")
+        self.home_button.grid(row=2, column=1, columnspan=1, pady=10, padx=10, sticky="e")
 
     def login(self):
         # login logic here
@@ -69,8 +69,8 @@ class RegistrationWindow(tk.Toplevel):
         self.password_label.grid(row=1, column=0, padx=10, pady=5, sticky="e")
         self.entry_username.grid(row=0, column=1, padx=10, pady=5, sticky="w")
         self.entry_password.grid(row=1, column=1, padx=10, pady=5, sticky="w")
-        self.login_button.grid(row=2, column=0, columnspan=2, pady=10)
-        self.home_button.grid(row=3, column=0, columnspan=2, pady=5)
+        self.login_button.grid(row=2, column=1, columnspan=1, pady=10, padx=10, sticky="w")
+        self.home_button.grid(row=2, column=1, columnspan=1, pady=10, padx=10, sticky="e")
 
     def register(self):
         # register logic here
@@ -124,16 +124,39 @@ class GameWindow(tk.Toplevel):
 class MainApplication(tk.Tk):
     def __init__(self, master):
         super().__init__(master)
-        self.title("Main Application")
-        self.minsize(300, 50)
+        self.title("Fishing Game")
+        self.geometry("300x100")
+        self.resizable(False, False)
 
-        self.login_button = tk.Button(self, text="Login", command=self.open_login_window)
+        self.photo = tk.PhotoImage(file="assets/fish-304097_640.gif")
+
+        # Restrict the size of the image (you can keep this part if you want)
+        base_width = 100
+        base_height = 60
+        img_width = self.photo.width()
+        img_height = self.photo.height()
+        x_factor = img_width // base_width
+        y_factor = img_height // base_height
+        factor = max(x_factor, y_factor)
+        if factor > 1:
+            self.photo = self.photo.subsample(factor)
+
+        # Display the image on the left
+        self.image_label = tk.Label(self, image=self.photo)
+        self.image_label.pack(side=tk.LEFT, padx=10, pady=10)
+
+        # Frame to hold the buttons
+        self.buttons_frame = tk.Frame(self)
+        self.buttons_frame.pack(side=tk.RIGHT, padx=10, pady=10)
+
+        # Pack the buttons inside the frame
+        self.login_button = tk.Button(self.buttons_frame, text="Login", command=self.open_login_window)
         self.login_button.config(width=25, height=1)
-        self.login_button.pack()
+        self.login_button.pack(pady=5)
 
-        self.register_button = tk.Button(self, text="Register", command=self.open_registration_window)
+        self.register_button = tk.Button(self.buttons_frame, text="Register", command=self.open_registration_window)
         self.register_button.config(width=25, height=1)
-        self.register_button.pack()
+        self.register_button.pack(pady=5)
 
     def open_login_window(self):
         self.withdraw()

@@ -44,8 +44,8 @@ def go_fishing(fish):
         6: 'Seaweed Monster (random) clump of seaweed'
     }
 
-    random_number = randint(1, 6)
-    fish_name = fish_names.get(random_number, None)
+    dice_roll = randint(1, 6)
+    fish_name = fish_names.get(dice_roll, None)
 
     if fish_name is not None:
         for fish_obj in fish:
