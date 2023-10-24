@@ -35,7 +35,7 @@ class LoginWindow(tk.Toplevel):
             is_match = check_password(password, csv_user_data)
             if is_match:
                 self.withdraw()
-                game_window = GameWindow(self)
+                game_window = GameWindow(self, username)
                 game_window.protocol("WM_DELETE_WINDOW", self.destroy_window)
             else:
                 pass  # not is_match
@@ -99,26 +99,105 @@ class RegistrationWindow(tk.Toplevel):
 
 
 class GameWindow(tk.Toplevel):
-    def __init__(self, master):
+    def __init__(self, master, username):
         super().__init__(master)
         self.title("Game")
-        # Add widgets and logic for the game
-        # GUI
-        # button (gofish, keepfish, releasefish)
-        # label (current fish)
+        self.geometry("375x300")
 
-        # logic
-        # track record of catches
-        # store the record of each cast of the fishing rod calculate the points for the player
-        # delete record from record of catches if released
+        self.username_ref = username
+        self.fish = read_fish_csv()
+        self.captured_fish = []
+        self.result_of_fishing = None
+        self.player_score = tk.IntVar(value=0)  # using IntVar so I can use get and set methods
 
-        fish = read_fish_csv()
+        self.infoLabel = tk.Label(self, text="", width=50, relief="ridge")
+        self.player_score_Label = tk.Label(self, text=self.player_score.get())
+        self.user_info_Label = tk.Label(self, text=f"Player: {self.username_ref} Score:")
 
-        result_of_fishing = go_fishing(fish)
-        print(result_of_fishing)
+        self.go_fishing_btn = tk.Button(self, text="Cast Rod", command=self.cast_rod, width=10)
+        self.keep_fish_btn = tk.Button(self, text="Keep Fish", command=self.keep_fish, width=10)
+        self.release_fish_btn = tk.Button(self, text="Release Fish", command=self.release_fish, width=10)
+        self.see_fish_btn = tk.Button(self, text="See Kept fish", command=self.see_fish, width=10)
 
-        # for fish_obj in fish:  # debug
-        #     print(f'fish: {fish_obj}')
+        self.infoLabel.grid(row=1, column=0, columnspan=3, padx=10, pady=10, sticky="n")
+        self.player_score_Label.grid(row=0, column=1, pady=10, sticky="w")
+        self.user_info_Label.grid(row=0, column=0, pady=10, sticky="e")
+        self.go_fishing_btn.grid(row=2, column=0, padx=10, pady=5)
+        self.keep_fish_btn.grid(row=2, column=1, padx=10, pady=5)
+        self.release_fish_btn.grid(row=2, column=2, padx=10, pady=5)
+        self.see_fish_btn.grid(row=4, column=1, padx=10, pady=5)
+
+    def cast_rod(self):
+        self.result_of_fishing = go_fishing(self.fish)
+        self.infoLabel.config(text=self.result_of_fishing.name)
+        if self.result_of_fishing.name == "Lost bait":
+            self.update_player_score("keep")
+            self.result_of_fishing = None
+
+    def keep_fish(self):
+        if self.result_of_fishing is None:
+            pass
+        else:
+            self.infoLabel.config(text=f"You Kept the ({self.result_of_fishing.name})")
+            self.update_player_score("keep")
+            self.captured_fish.append(self.result_of_fishing)
+            self.result_of_fishing = None  # resets result_of_fishing variable after appending to the list
+
+    def release_fish(self):
+        if self.result_of_fishing is None:
+            pass
+        else:
+            self.infoLabel.config(text=f"You Released the ({self.result_of_fishing.name})")
+            self.update_player_score("release")
+            self.result_of_fishing = None
+
+    def see_fish(self):
+        fish_list_window = FishListWindow(self, self.captured_fish, self.player_score)
+        fish_list_window.grab_set()
+
+    def update_player_score(self, flag):
+        current_score = self.player_score.get()
+        if flag == "keep":
+            new_score = current_score + int(self.result_of_fishing.points_if_kept)
+            self.player_score.set(new_score)
+        elif flag == "release":
+            new_score = current_score + int(self.result_of_fishing.points_if_released)
+            self.player_score.set(new_score)
+
+        self.player_score_Label.config(text=self.player_score.get())
+
+
+class FishListWindow(tk.Toplevel):
+    def __init__(self, master, captured_fish, player_score_ref):
+        super().__init__(master)
+        self.title("List of Captured Fish")
+        self.geometry("300x250")
+
+        self.captured_fish = captured_fish
+        self.player_score_ref = player_score_ref
+
+        self.listbox = tk.Listbox(self)
+        self.remove_button = tk.Button(self, text="Remove Fish", command=self.remove_fish, width=10)
+        self.close_button = tk.Button(self, text="Close", command=self.destroy, width=10)
+
+        for fish in self.captured_fish:
+            self.listbox.insert(tk.END, fish.name)
+
+        self.listbox.pack(padx=10, pady=10)
+        self.remove_button.pack(padx=10, pady=5)
+        self.close_button.pack(padx=10, pady=5)
+
+    def remove_fish(self):
+        selected_index = self.listbox.curselection()
+        if selected_index:
+            index = selected_index[0]
+            removed_fish = self.captured_fish.pop(index)
+            self.listbox.delete(index)
+            # remove player initial score for keeping the fish then give the score for releasing the fish
+            self.player_score_ref.set(self.player_score_ref.get() - int(removed_fish.points_if_kept))
+            self.player_score_ref.set(self.player_score_ref.get() + int(removed_fish.points_if_released))
+            self.master.player_score_Label.config(text=self.player_score_ref.get())
+            self.master.infoLabel.config(text=f"You changed your mind and released ({removed_fish.name})")
 
 
 class MainApplication(tk.Tk):
@@ -130,7 +209,7 @@ class MainApplication(tk.Tk):
 
         self.photo = tk.PhotoImage(file="assets/fish-304097_640.gif")
 
-        # Restrict the size of the image (you can keep this part if you want)
+        # Restrict the size of the image
         base_width = 100
         base_height = 60
         img_width = self.photo.width()
