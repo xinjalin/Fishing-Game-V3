@@ -121,10 +121,8 @@ class GameWindow(tk.Toplevel):
 
         self.infoLabel = tk.Label(self, text="", width=80, relief="ridge")
         self.player_score_Label = tk.Label(self, text=self.player_score.get())
-        # self.user_info_Label = tk.Label(self, text=f"Player: {self.username_ref}    Score:")
         self.user_info_Label = tk.Label(self, text=f"Player: {self.username_ref}")
         self.user_info_score_Label = tk.Label(self, text=f"Score:")
-
         self.go_fishing_btn = tk.Button(self, text="Cast Rod", command=self.cast_rod, width=10)
         self.keep_fish_btn = tk.Button(self, text="Keep Fish", command=self.keep_fish, width=10)
         self.release_fish_btn = tk.Button(self, text="Release Fish", command=self.release_fish, width=10)
