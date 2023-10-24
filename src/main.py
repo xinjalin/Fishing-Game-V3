@@ -8,6 +8,7 @@ class LoginWindow(tk.Toplevel):
         super().__init__(master)
         self.master = master
         self.title("Login")
+        self.resizable(False, False)
 
         # GUI components for Login Window
         self.username_label = tk.Label(self, text="Username")
@@ -16,6 +17,7 @@ class LoginWindow(tk.Toplevel):
         self.entry_password = tk.Entry(self, show="*")  # Show asterisks for password input
         self.login_button = tk.Button(self, text="Login", command=self.login)
         self.home_button = tk.Button(self, text="Home", command=self.home)
+        self.infoLabel = tk.Label(self, text="")
 
         # Position GUI components on the Login Window
         self.username_label.grid(row=0, column=0, padx=10, pady=5, sticky="e")
@@ -24,6 +26,7 @@ class LoginWindow(tk.Toplevel):
         self.entry_password.grid(row=1, column=1, padx=10, pady=5, sticky="w")
         self.login_button.grid(row=2, column=1, columnspan=1, pady=10, padx=10, sticky="w")
         self.home_button.grid(row=2, column=1, columnspan=1, pady=10, padx=10, sticky="e")
+        self.infoLabel.grid(row=3, column=0, columnspan=2, pady=10, padx=10, sticky="n")
 
     def login(self):
         # login logic here
@@ -38,9 +41,11 @@ class LoginWindow(tk.Toplevel):
                 game_window = GameWindow(self, username)
                 game_window.protocol("WM_DELETE_WINDOW", self.destroy_window)
             else:
-                pass  # not is_match
+                # not is_match
+                self.infoLabel.config(text="Invalid Password")
         else:
-            pass  # not present in csv
+            # not present in csv
+            self.infoLabel.config(text=f"username: {username} dose not exist.")
 
     def home(self):
         self.destroy()
@@ -55,6 +60,7 @@ class RegistrationWindow(tk.Toplevel):
         super().__init__(master)
         self.master = master
         self.title("Registration")
+        self.resizable(False, False)
 
         # GUI components for Login Window
         self.username_label = tk.Label(self, text="Username")
@@ -63,6 +69,7 @@ class RegistrationWindow(tk.Toplevel):
         self.entry_password = tk.Entry(self)
         self.login_button = tk.Button(self, text="Register", command=self.register)
         self.home_button = tk.Button(self, text="Home", command=self.home)
+        self.infoLabel = tk.Label(self, text="")
 
         # Position GUI components on the Login Window
         self.username_label.grid(row=0, column=0, padx=10, pady=5, sticky="e")
@@ -71,6 +78,7 @@ class RegistrationWindow(tk.Toplevel):
         self.entry_password.grid(row=1, column=1, padx=10, pady=5, sticky="w")
         self.login_button.grid(row=2, column=1, columnspan=1, pady=10, padx=10, sticky="w")
         self.home_button.grid(row=2, column=1, columnspan=1, pady=10, padx=10, sticky="e")
+        self.infoLabel.grid(row=3, column=0, columnspan=2, pady=10, padx=10, sticky="n")
 
     def register(self):
         # register logic here
@@ -78,10 +86,10 @@ class RegistrationWindow(tk.Toplevel):
         password = self.entry_password.get()
 
         if username == "" or password == "":
-            print('username or password not supplied')
+            self.infoLabel.config(text="username or password not supplied")
         else:
             if is_present_in_csv(username):  # user already exists
-                print(f"username: {username} all ready exists")  # change to gui
+                self.infoLabel.config(text=f"username: {username} all ready exists")
             else:  # register user
                 hpw = hash_password(password)
                 data = {'username': username, 'password_hash': hpw}
@@ -101,8 +109,9 @@ class RegistrationWindow(tk.Toplevel):
 class GameWindow(tk.Toplevel):
     def __init__(self, master, username):
         super().__init__(master)
-        self.title("Game")
-        self.geometry("375x300")
+        self.title("Fishing Game")
+        self.geometry("585x175")
+        self.resizable(False, False)
 
         self.username_ref = username
         self.fish = read_fish_csv()
@@ -110,22 +119,25 @@ class GameWindow(tk.Toplevel):
         self.result_of_fishing = None
         self.player_score = tk.IntVar(value=0)  # using IntVar so I can use get and set methods
 
-        self.infoLabel = tk.Label(self, text="", width=50, relief="ridge")
+        self.infoLabel = tk.Label(self, text="", width=80, relief="ridge")
         self.player_score_Label = tk.Label(self, text=self.player_score.get())
-        self.user_info_Label = tk.Label(self, text=f"Player: {self.username_ref} Score:")
+        # self.user_info_Label = tk.Label(self, text=f"Player: {self.username_ref}    Score:")
+        self.user_info_Label = tk.Label(self, text=f"Player: {self.username_ref}")
+        self.user_info_score_Label = tk.Label(self, text=f"Score:")
 
         self.go_fishing_btn = tk.Button(self, text="Cast Rod", command=self.cast_rod, width=10)
         self.keep_fish_btn = tk.Button(self, text="Keep Fish", command=self.keep_fish, width=10)
         self.release_fish_btn = tk.Button(self, text="Release Fish", command=self.release_fish, width=10)
-        self.see_fish_btn = tk.Button(self, text="See Kept fish", command=self.see_fish, width=10)
+        self.see_fish_btn = tk.Button(self, text="See Kept Fish", command=self.see_fish, width=10)
 
         self.infoLabel.grid(row=1, column=0, columnspan=3, padx=10, pady=10, sticky="n")
-        self.player_score_Label.grid(row=0, column=1, pady=10, sticky="w")
-        self.user_info_Label.grid(row=0, column=0, pady=10, sticky="e")
-        self.go_fishing_btn.grid(row=2, column=0, padx=10, pady=5)
-        self.keep_fish_btn.grid(row=2, column=1, padx=10, pady=5)
-        self.release_fish_btn.grid(row=2, column=2, padx=10, pady=5)
-        self.see_fish_btn.grid(row=4, column=1, padx=10, pady=5)
+        self.user_info_score_Label.grid(row=0, column=1, pady=10, sticky="e")
+        self.player_score_Label.grid(row=0, column=2, pady=10, sticky="w")
+        self.user_info_Label.grid(row=0, column=0, columnspan=2, pady=10, sticky="n")
+        self.go_fishing_btn.grid(row=2, column=0, padx=10, pady=5, sticky="n")
+        self.keep_fish_btn.grid(row=2, column=1, padx=10, pady=5, sticky="n")
+        self.release_fish_btn.grid(row=2, column=2, padx=10, pady=5, sticky="n")
+        self.see_fish_btn.grid(row=4, column=1, padx=10, pady=5, sticky="n")
 
     def cast_rod(self):
         self.result_of_fishing = go_fishing(self.fish)
@@ -133,6 +145,11 @@ class GameWindow(tk.Toplevel):
         if self.result_of_fishing.name == "Lost bait":
             self.update_player_score("keep")
             self.result_of_fishing = None
+            self.keep_fish_btn.config(state="disabled")
+            self.release_fish_btn.config(state="disabled")
+        else:
+            self.keep_fish_btn.config(state="normal")
+            self.release_fish_btn.config(state="normal")
 
     def keep_fish(self):
         if self.result_of_fishing is None:
@@ -172,11 +189,12 @@ class FishListWindow(tk.Toplevel):
         super().__init__(master)
         self.title("List of Captured Fish")
         self.geometry("300x250")
+        self.resizable(False, False)
 
         self.captured_fish = captured_fish
         self.player_score_ref = player_score_ref
 
-        self.listbox = tk.Listbox(self)
+        self.listbox = tk.Listbox(self, width=45)
         self.remove_button = tk.Button(self, text="Remove Fish", command=self.remove_fish, width=10)
         self.close_button = tk.Button(self, text="Close", command=self.destroy, width=10)
 
