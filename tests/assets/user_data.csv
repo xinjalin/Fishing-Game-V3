@@ -1,0 +1,8 @@
+username,password_hash
+test,hashed_password
+test2,hashed_password2
+test,hashed_password
+test2,hashed_password2
+test2,hashed_password2
+test,hashed_password
+test2,hashed_password2

@@ -17,10 +17,11 @@ class Fish:
         return f"{self.name}, {self.keeper}, {self.fish}, {self.points_if_kept}, {self.points_if_released}"
 
 
-def read_fish_csv():
+def read_fish_csv(file_path=None):
     objects = []
 
-    file_path = os.path.join(ASSETS_FOLDER, 'fish.csv')
+    if file_path is None:
+        file_path = os.path.join(ASSETS_FOLDER, 'fish.csv')
 
     with open(file_path, 'r') as file:
         csv_reader = csv.reader(file)
